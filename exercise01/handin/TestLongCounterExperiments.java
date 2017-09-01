@@ -7,7 +7,7 @@ public class TestLongCounterExperiments {
     final int counts = 10_000_000;
     Thread t1 = new Thread(() -> {
       for (int i=0; i<counts; i++) 
-	lc.increment();
+	lc.decrement();
     });
     Thread t2 = new Thread(() -> {
       for (int i=0; i<counts; i++) 
@@ -25,9 +25,13 @@ public class TestLongCounterExperiments {
 class LongCounter {
   private long count = 0;
   public synchronized void increment() {
-    count = count + 1;
+    count++;
   }
-  public  long get() { 
+  public synchronized void decrement() {
+    count--;
+  }
+
+  public synchronized long get() { 
     return count; 
   }
 }

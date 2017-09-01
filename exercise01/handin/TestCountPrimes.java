@@ -6,10 +6,10 @@
 public class TestCountPrimes {
   public static void main(String[] args) {
     final int range = 50_000_000;
-    System.out.printf("Sequential result: %10d%n%n", countSequential(range));
-    // System.out.printf("Parallel2  result: %10d%n%n", countParallel2(range/2));
+    //System.out.printf("Sequential result: %10d%n%n", countSequential(range));
+    System.out.printf("Parallel2  result: %10d%n%n", countParallel2(range/2));
     // System.out.printf("Parallel4  result: %10d%n%n", countParallelN(range, 4));
-    System.out.printf("Parallel10 result: %10d%n%n", countParallelN(range, 10));
+    //System.out.printf("Parallel10 result: %10d%n%n", countParallelN(range, 10));
   }
 
   private static boolean isPrime(int n) {
@@ -75,7 +75,7 @@ public class TestCountPrimes {
 
 class LongCounter {
   private long count = 0;
-  public synchronized void increment() {
+  public void increment() {
     count = count + 1;
   }
   public synchronized long get() { 
