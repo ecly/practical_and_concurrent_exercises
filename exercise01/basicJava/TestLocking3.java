@@ -1,6 +1,5 @@
 // For week 1
 // sestoft@itu.dk * 2016-09-01
-
 public class TestLocking3 {
     public static void main(String[] args) {
         final int counts = 10_000_000;
