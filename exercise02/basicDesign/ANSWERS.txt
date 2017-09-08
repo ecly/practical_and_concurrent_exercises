@@ -22,3 +22,16 @@ We need to ensure that our program knows that the cache can change at any point,
 
 ### 2
 This is a trick question. The final keyword is not needed with current implementation.
+
+## Exercise 2.3
+### 1
+Span will always hold the same value, therefore not needing synchronization. Both increment and getCount need to synchronize their access to the count array, thus we make the two methods synchronized.
+
+### 2
+We get the expected result with the source code from our SimpleHistogram.java. 
+
+### 3
+We remove synchronize and use an array of AtomicIntegers, resulting in correct results. We can remove the synchronized keyword because every bin handles concurrency on its own. This takes 4 seconds.
+
+### 4
+By using AtomicIntegerArray we're now able to cut our time down to 3 seconds.
