@@ -35,3 +35,66 @@ We remove synchronize and use an array of AtomicIntegers, resulting in correct r
 
 ### 4
 By using AtomicIntegerArray we're now able to cut our time down to 3 seconds.
+
+### 5
+Histogram 2 will give a snapshot as it synchronizes on the instance alongside both increment and getCount. For Histogram3 and Histogram4 we will get a live view, as the increments and our copy for loop may be arbitrarily interleaved.
+
+### 6
+As fast as Histogram4.
+This also results in a live view with getBins().
+
+## Exercise 2.4
+### 1
+See code in file TestCache.java
+
+### 2
+Called: 115000  
+Real time: 16.579s  
+User time: 17.18s  
+
+### 3
+Called: 157330  
+Real time: 11.592s  
+User time: 40.81s  
+
+Faster because ConcurrentHashmap allows parallelism.
+We get a larger called amount because compute in the Memoizer is no longer synchronized.
+
+### 4
+Called: 115798  
+Real time: 11.461s  
+User time: 25.13s  
+
+Here we fill out our cache with the Futures, meaning that we tell our cache that we're going to calculate this value already before we even calculate it, causing less superfluous calculations.
+
+### 5
+Called: 115000  
+Real time: 11.714  
+User time: 25.99s  
+
+Same as 4, except now using putIfAbsent() to ensure that we never do any superfluous calculations, since we only ever run the Future if it is absent.
+
+### 6
+Called: 115000  
+Real time: 11.698  
+User time: 26.18s  
+
+Basically same runtime, just a more modern implementation, perhaps more readable to some.
+
+### 7
+Called: 115000  
+Real time: 10.448s  
+User time: 27.69s  
+
+Even faster runtime with a very concise implementation. Super readable. No superfluous calculations. 
+
+## Exercise 2.5
+### 1 
+Both of the counters go above the expected 20,000,000.
+fresh 1 slightly more so than fresh 2. 
+
+### 2
+We think what happens is that count++ is equal to count = count + 1, causing count to be a new object. This means when fresh0 is finished, count is a new object now, while fresh1 is holding a lock on the previous count, meaning that fresh0 immediately acquires the lock on the new count, causing this behave as though no synchronization is happening whatsoever.
+
+### 3
+We simple create a separate lock object and use this instead. See code.
