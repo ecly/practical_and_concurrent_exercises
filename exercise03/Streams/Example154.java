@@ -4,6 +4,7 @@
 import java.util.function.BiFunction;
 import java.util.function.Consumer;  
 import java.util.function.Function;  
+import java.util.function.Predicate;
 
 class Example154 {
   public static void main(String[] args) {
@@ -15,23 +16,26 @@ class Example154 {
       list5 = list2.removeAt(3),                                  // 7 9 13       
       list6 = list5.reverse(),                                    // 13 9 7       
       list7 = list5.append(list5);                                // 7 9 13 7 9 13
-    System.out.println(list1);
-    System.out.println(list2);
-    System.out.println(list3);
-    System.out.println(list4);
-    System.out.println(list5);
-    System.out.println(list6);
+	
     System.out.println(list7);
+	FunList<Integer> list10 = list7.remove(7);
+	int list11 = list7.count(x -> x > 7);
+	FunList<Integer> list12 = list7.filter(x -> x > 9);
+	FunList<Integer> list13 = list7.removeFun(13);
+	FunList<FunList<Integer>> lists = cons(list1, cons(list2, new FunList<FunList<Integer>>())); 
+	FunList<Integer> list14 = FunList.flatten(lists);
+	FunList<Integer> list15 = list7.flatMap(x -> cons(x+1, new FunList<Integer>()));
+	System.out.println(list10);
+	System.out.println(list11);
+	System.out.println(list12);
+	System.out.println(list13);
+	System.out.println(list14);
+	System.out.println(list15);
     FunList<Double> list8 = list5.map(i -> 2.5 * i);              // 17.5 22.5 32.5
-    System.out.println(list8); 
     double sum = list8.reduce(0.0, (res, item) -> res + item),    // 72.5
-       product = list8.reduce(1.0, (res, item) -> res * item);    // 12796.875
-    System.out.println(sum);
-    System.out.println(product);
+    product = list8.reduce(1.0, (res, item) -> res * item);    // 12796.875
     FunList<Boolean> list9 = list5.map(i -> i < 10);              // true true false 
-    System.out.println(list9);
     boolean allBig = list8.reduce(true, (res, item) -> res && item > 10);
-    System.out.println(allBig);
   }
 
   public static <T> FunList<T> cons(T item, FunList<T> list) { 
@@ -47,7 +51,7 @@ class FunList<T> {
     public final Node<U> next;
 
     public Node(U item, Node<U> next) {
-      this.item = item; 
+  	  this.item = item; 
       this.next = next; 
     }
   }
@@ -105,7 +109,27 @@ class FunList<T> {
   }
 
   public FunList<T> remove(T x) {
-	
+    return reduce(new FunList<T>(), (res, item) -> item != x ? cons(item, res) : res);
+  }
+
+  public int count(Predicate<T> p) {
+    return reduce(0, (res, item) -> p.test(item) ? ++res : res);
+  }
+
+  public FunList<T> filter(Predicate<T> p) {
+    return reduce(new FunList<T>(), (res, item) -> p.test(item) ? cons(item, res) : res);
+  }
+
+  public FunList<T> removeFun(T x) {
+	return filter(y -> y != x);
+  }
+
+  public static <T> FunList<T> flatten(FunList<FunList<T>> xss) {
+	return xss.reduce(new FunList<T>(), (res, item) -> res.append(item));
+  }
+
+  public <U> FunList<U> flatMap(Function<T, FunList<U>> f) {
+    return flatten(map(x -> f.apply(x)));
   }
 
   protected static <T> Node<T> removeAt(int i, Node<T> xs) {
