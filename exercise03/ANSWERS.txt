@@ -1,0 +1,19 @@
+Excercise 3.1:
+
+1:
+See code.
+
+2:
+See code.
+
+3:
+See code.
+
+4:
+See code.
+
+5&6:
+Our initial implementation used the reduce function - so we did not make flattenFun().
+
+7:
+See code.
