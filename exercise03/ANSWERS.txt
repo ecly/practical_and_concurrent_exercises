@@ -17,3 +17,45 @@ Our initial implementation used the reduce function - so we did not make flatten
 
 7:
 See code.
+
+8:
+See code.
+
+Excercise 3.2:
+(Running Exercise32, should print answers)
+1. See code in file Exercise32.java
+
+2. See code in file Exercise32.java
+
+3. See code in file Exercise32.java
+
+Excercise 3.2:
+1. See code.
+
+2. See code.
+
+3. See code.
+
+4. See code.
+
+5. See code.
+
+6. Both are sufficiently fast that we're unable to tell the difference.
+   It could however easily be tested.
+
+7. See code, but prints more than asked for.
+   Any elegant way to do only exactly what was asked for?
+
+8. See code
+
+9. See code
+
+10. See code
+    Did not see a specific tree map stream. Is this implementation far from intended?
+
+11. See code
+
+12. Vaaaaastly slower when just jamming on .parallel() (as hinted in 13)
+    Rough estimate of about 4 times as slow on tested machine.
+
+13. 8s total in comparison to non-concurrent 15s~
