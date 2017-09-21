@@ -64,4 +64,16 @@ Exercise 3.4:
 
 1. See code, the result is correct.
 
-2. Sequential: 10s, parallel: 3,7 - 4 cores, it makes sense. The result is the same in parallel.
+2. Sequential: 7.5s, parallel: 1.45 - 8 cores, it makes sense. The result is the same in parallel.
+
+3. 6.66s wall clock. The result is however now: 21.3004815013485500
+   In contrast to our streams: 21.3004815003479420
+
+4. This takes 4.58s wall clock and produces the accurate result from 1/2.
+
+5. Three executions all produced different results. Namely:
+    63.1409618562123850
+    66.9986484503136000
+    68.7922630772929700
+
+   This tells us that is very unwise to combine mutable state and parallel streams.
