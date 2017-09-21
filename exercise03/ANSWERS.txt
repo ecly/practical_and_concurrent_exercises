@@ -29,7 +29,7 @@ Excercise 3.2:
 
 3. See code in file Exercise32.java
 
-Excercise 3.2:
+Excercise 3.3:
 1. See code.
 
 2. See code.
@@ -59,3 +59,9 @@ Excercise 3.2:
     Rough estimate of about 4 times as slow on tested machine.
 
 13. 8s total in comparison to non-concurrent 15s~
+
+Excercise 3.4:
+
+1. See code, the result is correct.
+
+2. Sequential: 10s, parallel: 3,7 - 4 cores, it makes sense.
