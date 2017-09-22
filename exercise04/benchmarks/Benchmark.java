@@ -2,29 +2,36 @@
 // sestoft@itu.dk * 2013-06-02, 2015-09-15
 
 import java.util.function.IntToDoubleFunction;
+import java.lang.Math;
 
 class Benchmark {
   public static void main(String[] args) {
-    SystemInfo();
-    Mark0();
-    Mark1();
-    Mark2();
-    Mark3();
-    Mark4();
-    Mark5();
-    Mark6("multiply", Benchmark::multiply);
-    Mark7("multiply", Benchmark::multiply);
-    MathFunctionBenchmarks();
-    final java.util.Random rnd = new java.util.Random();
-    final int n = 1638400;
-    Mark8("random_index", i -> rnd.nextInt(n));
-    SearchBenchmarks();
-    SearchScalabilityBenchmarks1();
-    SearchScalabilityBenchmarks2();
-    GetPseudorandomItems();
-    SortingBenchmarks();
-    SortingScalabilityBenchmarks();
-  }
+   // SystemInfo();
+   // Mark0();
+   // Mark1();
+   // Mark2();
+   // Mark3();
+   // Mark4();
+   // Mark5();
+    //  Mark6("multiply", Benchmark::multiply);
+    Mark7("pow", n -> Math.pow(10.0, 0.1 * (n & 0xFF)));
+
+    Mark7("exp", n -> Math.exp(0.1 * (n & 0xFF)));
+    Mark7("log", n -> Math.log(0.1 + 0.1 * (n & 0XFF)));
+    Mark7("cos", n -> Math.cos(0.1 * (n & 0xFF)));
+   // Mark7("", Benchmark::multiply);
+   // Mark7("multiply", Benchmark::multiply);
+   // MathFunctionBenchmarks();
+  //  final java.util.Random rnd = new java.util.Random();
+  //  final int n = 1638400;
+  //  Mark8("random_index", i -> rnd.nextInt(n));
+  //  SearchBenchmarks();
+  //  SearchScalabilityBenchmarks1();
+  //  SearchScalabilityBenchmarks2();
+  //  GetPseudorandomItems();
+  //  SortingBenchmarks();
+  //  SortingScalabilityBenchmarks();
+    }
 
   // ========== Example functions and benchmarks ==========
 

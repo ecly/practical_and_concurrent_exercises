@@ -1,0 +1,107 @@
+Exercise 4.1:
+1.
+System information:
+# OS:   Linux; 4.11.0-14-generic; amd64
+# JVM:  Oracle Corporation; 1.8.0_144
+# CPU:  null; 4 "cores", Intel(R) Core(TM) i7-3667U CPU @ 2.00GHz
+# Date: 2017-09-22T10:19:10+0200
+
+Mark1:
+0.1 ns
+
+Mark6:
+multiply                            613.5 ns    1357.67          2
+multiply                            155.4 ns      56.10          4
+multiply                          40016.5 ns  125771.61          8
+multiply                            171.7 ns     190.46         16
+multiply                            104.7 ns      10.64         32
+multiply                             65.9 ns      35.52         64
+multiply                             53.2 ns       9.16        128
+multiply                             50.1 ns       2.71        256
+multiply                             52.8 ns       6.82        512
+multiply                             46.9 ns       5.95       1024
+multiply                             46.0 ns       3.41       2048
+multiply                             45.3 ns       1.53       4096
+multiply                             36.0 ns       1.75       8192
+multiply                             35.7 ns       1.29      16384
+multiply                             32.9 ns       1.46      32768
+multiply                             34.4 ns       3.21      65536
+multiply                             31.7 ns       0.03     131072
+multiply                             31.8 ns       0.29     262144
+multiply                             31.7 ns       0.06     524288
+multiply                             31.8 ns       0.22    1048576
+multiply                             31.8 ns       0.22    2097152
+multiply                             31.9 ns       0.66    4194304
+multiply                             32.0 ns       0.54    8388608
+
+2.
+pow                                  79.4 ns       0.13    4194304
+exp                                  57.5 ns       0.03    8388608
+log                                  24.9 ns       0.02   16777216
+cos                                 122.6 ns       0.08    2097152
+The results are plausible. They are surprisingly well aligned with the benchmark PDF - may be due to the similarities of the CPUs. 
+
+Exercise 4.2:
+1.
+This example:
+
+Uncontended lock                      9.2 ns       3.28        256
+Uncontended lock                     15.6 ns       5.41        512
+
+The increasing standard deviation is strange as we would expect it to decrease with increasing iterations - this trend is seen troughout repeated experiments. The same is true for other spikes. We haven't got a very good explanation for this, please help out. 
+
+2. 
+# OS:   Linux; 4.11.0-14-generic; amd64
+# JVM:  Oracle Corporation; 1.8.0_144
+# CPU:  null; 4 "cores", Intel(R) Core(TM) i7-3667U CPU @ 2.00GHz
+# Date: 2017-09-22T10:19:10+0200
+hashCode()                            2.8 ns       0.01  134217728
+Point creation                       59.7 ns       1.56    4194304
+Thread's work                      6919.2 ns       4.41      65536
+Thread create                       919.8 ns      16.10     524288
+Thread create start               35035.8 ns     746.35       8192
+Thread create start join          53537.7 ns     516.33       8192
+ai value = 1638340000
+Uncontended lock                      7.5 ns       2.92   67108864
+
+These results are plausible. They are surprisingly well aligned with the lecture slides (for the i7 CPU) - may  be due to the similarities of the CPUs. 
+
+Exercise 4.3
+1.
+# OS:   Linux; 4.11.0-14-generic; amd64
+# JVM:  Oracle Corporation; 1.8.0_144
+# CPU:  null; 4 "cores"
+# Date: 2017-09-22T11:17:01+0200
+countSequential                   11573.2 us      46.99         32
+countParallelN      1             14438.2 us    2002.98         16
+countParallelNLocal      1         16551.5 us     868.79         32
+countParallelN      2              7657.1 us     226.70         64
+countParallelNLocal      2          7742.0 us     500.37         64
+countParallelN      3              7940.9 us      38.45         64
+countParallelNLocal      3          8004.9 us      74.53         32
+countParallelN      4              5649.5 us      36.35         64
+countParallelNLocal      4          5603.7 us      41.98         64
+countParallelN      5              6920.7 us     122.69         64
+countParallelNLocal      5          7083.6 us      59.18         64
+countParallelN      6              6803.8 us     115.33         64
+countParallelNLocal      6          6898.8 us      71.12         64
+countParallelN      7              6756.6 us      74.15         64
+countParallelNLocal      7         10232.4 us    3940.06         64
+countParallelN      8              6695.8 us      92.13         64
+countParallelNLocal      8          9605.9 us    3312.78         32
+countParallelN      9              6922.5 us      53.86         64
+countParallelNLocal      9          7724.5 us    1921.11         64
+countParallelN     10              6872.1 us      69.95         64
+countParallelNLocal     10          6987.5 us      99.01         64
+countParallelN     11              6868.6 us      63.97         64
+countParallelNLocal     11         10486.9 us    4436.35         32
+countParallelN     12              6839.5 us      49.97         64
+countParallelNLocal     12          6990.8 us      91.98         64
+countParallelN     13              6884.3 us      49.39         64
+countParallelNLocal     13         13897.2 us    2912.90         32
+countParallelN     14              8492.8 us    3444.63         64
+countParallelNLocal     14          6982.6 us      63.00         64
+countParallelN     15              6933.6 us      78.74         64
+countParallelNLocal     15         13633.0 us    3676.23         16
+
+Our plotted graphs both show a sweet spot at 4 threads, which aligns with the 4 cores. In countParallelNLocal, odd numbers of threads result in high running time. The even numbers have eqaul running time to the countParallelN. Why we see this difference in running time on odd numbers are a mystery to us, and by inspecting the code we still can't find an answer. 
