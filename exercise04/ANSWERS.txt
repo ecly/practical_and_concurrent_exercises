@@ -104,4 +104,31 @@ countParallelNLocal     14          6982.6 us      63.00         64
 countParallelN     15              6933.6 us      78.74         64
 countParallelNLocal     15         13633.0 us    3676.23         16
 
+2.
+See countParallelN.png and countParallelNLocal.png
+
+3.
 Our plotted graphs both show a sweet spot at 4 threads, which aligns with the 4 cores. In countParallelNLocal, odd numbers of threads result in high running time. The even numbers have eqaul running time to the countParallelN. Why we see this difference in running time on odd numbers are a mystery to us, and by inspecting the code we still can't find an answer. 
+
+4.
+The performance seems to be more unstable when using the AtomicLong. Not performing better at least.
+
+5.
+The performance does not get better when using local variable. Why? We don't know.
+
+Exercise 4.4
+
+1., 2., 3., 4., 5., 6.
+
+class Memoizer1          ,         4733.9 us
+class Memoizer2          ,          985.5 us
+class Memoizer3          ,         1355.1 us
+class Memoizer4          ,         1373.1 us
+class Memoizer5          ,         2245.7 us
+class Memoizer           ,         2096.7 us
+
+7.
+The Memoizer2 performs best. This does not agree with how we expected the cache classes to evolve. Though, the Memoizer2 seems to scale better with high thread count. 
+
+8.
+It would be preferable to watch how the program performed on various thread counts instead of only 16. Letting the threads work on a higher range than 2000 may also uncover some interesting result. We are a bit puzzled as to why Memoizer2 is so fast..
