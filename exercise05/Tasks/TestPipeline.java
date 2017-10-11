@@ -25,7 +25,15 @@ import java.io.IOException;
 import java.util.regex.Matcher;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
+
+// Added for assignment
+import java.util.concurrent.ExecutionException;
 import java.util.HashSet;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ExecutorService;
+import java.util.ArrayList;
+import java.util.List;
 
 public class TestPipeline {
     public static void main(String[] args) {
@@ -37,12 +45,47 @@ public class TestPipeline {
         final BlockingQueue<Webpage> pages = new OneItemQueue<Webpage>();
         final BlockingQueue<Link> refPairs = new OneItemQueue<Link>();
         final BlockingQueue<Link> uniques = new OneItemQueue<Link>();
+       
+        ///* 5.4.3 and 5.4.6 with an extra PageGetter
+        ExecutorService executor = Executors.newWorkStealingPool();
+        List<Future<?>> futures = new ArrayList<Future<?>>();
+        futures.add(executor.submit(new Thread(new UrlProducer(urls))));
+        futures.add(executor.submit(new Thread(new PageGetter(urls, pages))));
+        futures.add(executor.submit(new Thread(new PageGetter(urls, pages))));
+        futures.add(executor.submit(new Thread(new LinkScanner(pages, refPairs))));
+        futures.add(executor.submit(new Thread(new Uniquifier<Link>(refPairs, uniques))));
+        futures.add(executor.submit(new Thread(new LinkPrinter(uniques))));
+        //*/
+
+        /* 5.4.4 and 5.4.5 with pool size change
+        ExecutorService executor = Executors.newFixedThreadPool(3);
+        List<Future<?>> futures = new ArrayList<Future<?>>();
+        futures.add(executor.submit(new Thread(new UrlProducer(urls))));
+        futures.add(executor.submit(new Thread(new PageGetter(urls, pages))));
+        futures.add(executor.submit(new Thread(new LinkScanner(pages, refPairs))));
+        futures.add(executor.submit(new Thread(new Uniquifier<Link>(refPairs, uniques))));
+        futures.add(executor.submit(new Thread(new LinkPrinter(uniques))));
+        */
+
+        try {
+          for (Future<?> fut : futures)
+            fut.get();
+        } catch (InterruptedException exn) { 
+          System.out.println("Interrupted: " + exn);
+        } catch (ExecutionException exn) { 
+          throw new RuntimeException(exn.getCause()); 
+        }
+        //*/
+
+
+        ///* 5.4.2
         Thread t1 = new Thread(new UrlProducer(urls));
         Thread t2 = new Thread(new PageGetter(urls, pages));
         Thread t3 = new Thread(new LinkScanner(pages, refPairs));
         Thread t4 = new Thread(new Uniquifier<Link>(refPairs, uniques));
         Thread t5 = new Thread(new LinkPrinter(uniques));
         t1.start(); t2.start(); t3.start(); t4.start(); t5.start(); 
+        //*/
     }
 }
 

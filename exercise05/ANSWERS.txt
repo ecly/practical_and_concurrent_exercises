@@ -1,11 +1,28 @@
 #Exercise 5
 ## 5.1
 ### 1
+This is shown in graph.png
 
 ### 2
+This is shown in graph.png
+
+### 3
+This is shown in graph.png
+
+### 4
+As shown in graph.png, the results are very interleaved.
+Overall it does however show that in terms of consistency
+across all the executions, WorkStealingPool performs vastly more
+consistent than the cached counterpart, with best results coming from
+WorkStealingPool for 'countParTask1'.
+
+Naturally everything below the amount of virtual cores (in this case 4),
+performs worse than 4. Everything above the virtual core count seems very
+inconsistent, but does on occassion perform great. Overall the ideal amount
+across all tests does however seem to be task_count = virtual_core_count.
 
 ### 5
-
+This is shown in long_adder.png
 
 ## 5.3
 ### 1
@@ -49,4 +66,26 @@ http://www.dr.dk links to http://www.dr.dk/nyheder/
 
 With the uniquifier this now only appears once.
 
+### 3
+This yields identical results to the threads from 5.4.2 with the exception
+of google signatures which can be disregarded.
 
+### 4
+This yields identical results to the threads from 5.4.3
+
+### 5
+Here we go no output, meaning that at least no link reaches the LinkPrinter.
+This happens due to the following (taken from javadocs):
+
+*At any point, at most nThreads threads will be active processing tasks. If additional tasks are submitted when all threads are active, they will wait in the queue until a thread is available.*
+
+This means that the LinkPrinter or even some other of our Runnables never get any time
+in the pool, causing our dependency chain to crumble.
+
+### 6
+This yields same results as 5.4.3 and 5.4.4 but from observation of output pace,
+clearly a fair bit faster. For two test cases order came out identical.
+
+Seeing as the OneItemQueues are implemented supposedly thread-safe this will merely
+cause us to send requests at twice the pace, without any thread disruptions to the queues.
+Order could however vary if some requests are very slow etc.
