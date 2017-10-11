@@ -43,3 +43,10 @@ part of the total time, where it will a smaller factor for the sequential one.
 That worked nicely!
 
 ### 2
+See code for the Uniquifier.
+Before below appeared twice:
+http://www.dr.dk links to http://www.dr.dk/nyheder/
+
+With the uniquifier this now only appears once.
+
+

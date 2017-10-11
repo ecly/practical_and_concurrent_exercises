@@ -18,7 +18,7 @@ import java.util.concurrent.Future;
 import java.util.function.IntToDoubleFunction;
 
 
-public class TestCountPrimesTasks {
+public class TestCountPrimesTasks1 {
   private static final ExecutorService executor 
     //= Executors.newWorkStealingPool();
     = Executors.newCachedThreadPool();
