@@ -1,0 +1,45 @@
+#Exercise 5
+## 5.1
+### 1
+
+### 2
+
+### 5
+
+
+## 5.3
+### 1
+It works
+
+### 2
+See code: We got 7 unresponsive pages, but left them in.
+
+### 3
+Below is results, where time is time from start of experiment.
+Sequential rep 0, time: 10.233204
+Sequential rep 1, time: 16.096665
+Sequential rep 2, time: 21.034460
+Sequential rep 3, time: 25.209228
+Sequential rep 4, time: 29.653033
+
+The fastests run was rep 3, and rep 0 was the slowest.
+
+### 4
+Parallel rep 0, time: 1.712778
+Parallel rep 1, time: 4.041850
+Parallel rep 2, time: 6.193783
+Parallel rep 3, time: 8.078128
+Parallel rep 4, time: 9.938540
+
+A lot quicker.
+
+### 5
+It's not 23 times faster due to pages taking various time to retrieve.
+As such it will be influenced heavily by the slowest one and have that be a larger
+part of the total time, where it will a smaller factor for the sequential one.
+
+## 5.4
+### 1
+That worked nicely!
+
+### 2
