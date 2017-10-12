@@ -23,6 +23,12 @@ across all tests does however seem to be task_count = virtual_core_count.
 
 ### 5
 This is shown in long_adder.png
+We see that with higher number of tasks, the LongAdder still manages
+to hit really fast times of around 5300 microseconds, which LongCounter
+only manages to do at more ideal number of tasks.
+As such, there's indication that LongAdder is better for the job, however
+it still suffers from unstable results either due to exessive locking with 
+bad number of tasks or merely unstable results.
 
 ## 5.3
 ### 1
