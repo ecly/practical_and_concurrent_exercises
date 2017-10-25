@@ -31,4 +31,38 @@ class StripedMap
        217 maps to E
 
 ### 8
+# OS:   Linux; 4.12.13-1-ARCH; amd64
+# JVM:  Oracle Corporation; 1.8.0_144
+# CPU:  null; 4 "cores"
+# Date: 2017-10-25T10:57:57+0200
+SynchronizedMap       16         413709.8 us   11204.82          2
+99992.0
+StripedMap            16         193606.4 us   28971.18          2
+99992.0
+
+This is an expected increase in performance, since we avoid superfluous locking.
+
+### 9
+For methods requiring all locks, striping with a lower lockCount is faster than higher ones,
+due the smaller amount of required locking. It also consumes less memory.
+
+### 10
+Smaller chance of multiple threads wanting to acquire the same lock.
+
+### 11
+As seen in the example, items in the same bucket will have a risk of using separate locks.
+
+Bucket count = 3
+Lock count = 2
+
+hash1 = 8
+hash2 = 5
+
+bucket1 = 8 % 3 = 2
+bucket2 = 5 % 3 = 2
+lock1 = 8 % 2 = 0
+lock2 = 5 % 2 = 1
+
+== BAD
+
 

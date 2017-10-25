@@ -15,12 +15,13 @@ public class TestStripedMap {
     public static void main(String[] args) {
         SystemInfo();
         //testAllMaps();    // Must be run with: java -ea TestStripedMap 
-        //exerciseAllMaps();
+        exerciseAllMaps();
 
-        final int bucketCount = 100_000, lockCount = 32;
+        /*final int bucketCount = 100_000, lockCount = 32;
         StripedMap<Integer, String> map = new StripedMap(bucketCount, lockCount);
-        testMap(map);
-        // timeAllMaps();
+        //testMap(map);
+        //timeAllMaps();
+        */
     }
 
     private static void timeAllMaps() {
@@ -98,12 +99,13 @@ public class TestStripedMap {
         System.out.println(Mark7(String.format("%-21s %d", "StripedMap", threadCount),
                     i -> exerciseMap(threadCount, perThread, range,
                         new StripedMap<Integer,String>(bucketCount, lockCount))));
-        System.out.println(Mark7(String.format("%-21s %d", "StripedWriteMap", threadCount), 
+       /* System.out.println(Mark7(String.format("%-21s %d", "StripedWriteMap", threadCount), 
                     i -> exerciseMap(threadCount, perThread, range,
                         new StripedWriteMap<Integer,String>(lockCount, lockCount))));
         System.out.println(Mark7(String.format("%-21s %d", "WrapConcHashMap", threadCount),
                     i -> exerciseMap(threadCount, perThread, range,
                         new WrapConcurrentHashMap<Integer,String>())));
+                        */
     }
 
     // Very basic sequential functional test of a hash map.  You must
