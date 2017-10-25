@@ -16,9 +16,9 @@ public class TestStripedMap {
         SystemInfo();
         final int bucketCount = 100_000, lockCount = 32;
         //testAllMaps();    // Must be run with: java -ea TestStripedMap 
-        //exerciseAllMaps();
-        StripedWriteMap<Integer, String> map = new StripedWriteMap(bucketCount, lockCount);
-        testMap(map);
+        exerciseAllMaps();
+        //StripedWriteMap<Integer, String> map = new StripedWriteMap(bucketCount, lockCount);
+        //testMap(map);
         //StripedMap<Integer, String> map = new StripedMap(bucketCount, lockCount);
         //timeAllMaps();
     }
@@ -98,13 +98,12 @@ public class TestStripedMap {
         System.out.println(Mark7(String.format("%-21s %d", "StripedMap", threadCount),
                     i -> exerciseMap(threadCount, perThread, range,
                         new StripedMap<Integer,String>(bucketCount, lockCount))));
-        /* System.out.println(Mark7(String.format("%-21s %d", "StripedWriteMap", threadCount), 
+         System.out.println(Mark7(String.format("%-21s %d", "StripedWriteMap", threadCount), 
            i -> exerciseMap(threadCount, perThread, range,
            new StripedWriteMap<Integer,String>(lockCount, lockCount))));
-           System.out.println(Mark7(String.format("%-21s %d", "WrapConcHashMap", threadCount),
+         System.out.println(Mark7(String.format("%-21s %d", "WrapConcHashMap", threadCount),
            i -> exerciseMap(threadCount, perThread, range,
            new WrapConcurrentHashMap<Integer,String>())));
-           */
     }
 
     // Very basic sequential functional test of a hash map.  You must
@@ -717,7 +716,7 @@ class StripedWriteMap<K,V> implements OurMap<K,V> {
         if (afterSize * lockCount > bs.length)
             reallocateBuckets(bs);
 
-        return v;
+        return current.get();
     }
 
     // Remove and return the value at key k if any, else return null
@@ -729,8 +728,8 @@ class StripedWriteMap<K,V> implements OurMap<K,V> {
             bs = buckets;
             final ItemNode<K,V> node = bs[hash], 
                   oldNode = ItemNode.delete(node, k, old);
-
-            sizes.addAndGet(stripe, oldNode == node ? -1 : 0);
+            bs[hash] = oldNode;
+            sizes.addAndGet(stripe, oldNode != node ? -1 : 0);
         }
         return old.get();
     }

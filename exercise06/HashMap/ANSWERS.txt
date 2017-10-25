@@ -1,0 +1,131 @@
+# Exercise 6
+## 6.1
+### 1
+See code.
+### 2
+Here we want visibility of recent potential operations on the map, and as such
+we lock prior to reading the size of each bucket.
+### 3
+See code.
+### 4
+See code.
+### 5
+See code.
+### 6
+We have implemented version 2 as it performs slightly better than version 1,
+since we lock a stripe and then operate on it, instead of locking all stripes before locking.
+### 7
+We did this and all assertions passed. The output was:
+
+class StripedMap
+        17 maps to B
+       117 maps to C
+        34 maps to F
+        17 maps to B
+       217 maps to E
+        34 maps to F
+        17 maps to B
+       217 maps to E
+        34 maps to F
+        17 maps to B
+       217 maps to E
+
+### 8
+# OS:   Linux; 4.12.13-1-ARCH; amd64
+# JVM:  Oracle Corporation; 1.8.0_144
+# CPU:  null; 4 "cores"
+# Date: 2017-10-25T10:57:57+0200
+SynchronizedMap       16         413709.8 us   11204.82          2
+99992.0
+StripedMap            16         193606.4 us   28971.18          2
+99992.0
+
+This is an expected increase in performance, since we avoid superfluous locking.
+
+### 9
+For methods requiring all locks, striping with a lower lockCount is faster than higher ones,
+due the smaller amount of required locking. It also consumes less memory.
+
+### 10
+Smaller chance of multiple threads wanting to acquire the same lock.
+
+### 11
+As seen in the example, items in the same bucket will have a risk of using separate locks.
+
+Bucket count = 3
+Lock count = 2
+
+hash1 = 8
+hash2 = 5
+
+bucket1 = 8 % 3 = 2
+bucket2 = 5 % 3 = 2
+lock1 = 8 % 2 = 0
+lock2 = 5 % 2 = 1
+
+== BAD
+
+## 6.2
+### 1
+See code.
+
+### 2
+See code.
+
+### 3
+If nothing new is added, there is no need for visibility.
+
+### 4
+See code.
+
+### 5
+See code.
+
+### 6
+# OS:   Linux; 4.12.13-1-ARCH; amd64
+# JVM:  Oracle Corporation; 1.8.0_144
+# CPU:  null; 4 "cores"
+# Date: 2017-10-25T13:14:16+0200
+SynchronizedMap       16         414864.0 us   10107.68          2
+99992.0
+StripedMap            16         194810.0 us   39551.88          2
+99992.0
+StripedWriteMap       16         123834.7 us    1826.75          4
+99992.03333333334
+WrapConcHashMap       16         155527.5 us   67257.14          2
+99992.0
+
+We expected the StripedWriteMap to be faster, since reads won't be blocked.
+It is perhaps surprising that it is faster than Java's ConcurrentHashMap.
+
+## 6.3
+### 1
+
+# OS:   Linux; 4.12.13-1-ARCH; amd64
+# JVM:  Oracle Corporation; 1.8.0_144
+# CPU:  null; 4 "cores"
+# Date: 2017-10-25T13:21:27+0200
+current thread hashCode               0.0 us       0.00  134217728
+ThreadLocalRandom                     0.0 us       0.00   67108864
+AtomicLong                       856857.4 us    9536.53          2
+LongAdder                        119253.6 us    1363.44          4
+LongCounter                      343805.2 us  216002.73          2
+NewLongAdder                     393229.7 us   54759.66          2
+NewLongAdderPadded               151176.1 us   17151.19          2
+
+### 2
+
+# OS:   Linux; 4.12.13-1-ARCH; amd64
+# JVM:  Oracle Corporation; 1.8.0_144
+# CPU:  null; 4 "cores"
+# Date: 2017-10-25T13:26:33+0200
+current thread hashCode               0.0 us       0.00  134217728
+ThreadLocalRandom                     0.0 us       0.00   67108864
+AtomicLong                       856690.6 us   16921.49          2
+LongAdder                        119418.1 us    3388.75          4
+LongCounter                      323955.5 us  140210.37          2
+NewLongAdder                     377603.7 us   61762.44          2
+NewLongAdderPadded               155554.2 us   15895.58          2
+NewLongAdderLessPadded           175656.2 us   14252.41          2
+
+The new Objects make a noticably positive difference on this machine (2014 MBP).
