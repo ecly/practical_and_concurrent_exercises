@@ -1,0 +1,34 @@
+# Exercise 6
+## 6.1
+### 1
+See code.
+### 2
+Here we want visibility of recent potential operations on the map, and as such
+we lock prior to reading the size of each bucket.
+### 3
+See code.
+### 4
+See code.
+### 5
+See code.
+### 6
+We have implemented version 2 as it performs slightly better than version 1,
+since we lock a stripe and then operate on it, instead of locking all stripes before locking.
+### 7
+We did this and all assertions passed. The output was:
+
+class StripedMap
+        17 maps to B
+       117 maps to C
+        34 maps to F
+        17 maps to B
+       217 maps to E
+        34 maps to F
+        17 maps to B
+       217 maps to E
+        34 maps to F
+        17 maps to B
+       217 maps to E
+
+### 8
+
