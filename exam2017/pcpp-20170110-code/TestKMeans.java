@@ -23,6 +23,10 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
+import org.multiverse.api.references.*;
+import static org.multiverse.api.StmUtils.*;
+import org.multiverse.api.StmUtils;
+
 public class TestKMeans {
     public static void main(String[] args) {
         // There are n points and k clusters
@@ -33,9 +37,9 @@ public class TestKMeans {
             // timeKMeans(new KMeans1(points, k), initialPoints);
             //timeKMeans(new KMeans1P(points, k), initialPoints);
             //timeKMeans(new KMeans2(points, k), initialPoints);
-            timeKMeans(new KMeans2P(points, k), initialPoints);
-            // timeKMeans(new KMeans2Q(points, k), initialPoints);
-            // timeKMeans(new KMeans2Stm(points, k), initialPoints);
+            //timeKMeans(new KMeans2P(points, k), initialPoints);
+            //timeKMeans(new KMeans2Q(points, k), initialPoints);
+            timeKMeans(new KMeans2Stm(points, k), initialPoints);
             // timeKMeans(new KMeans3(points, k), initialPoints);
             // timeKMeans(new KMeans3P(points, k), initialPoints);
             System.out.println();
@@ -646,3 +650,231 @@ class KMeans2P implements KMeans {
     }
 }
 
+class KMeans2Q implements KMeans {
+    // Sequential version 2.  Data represention: An array points of
+    // Points and a same-index array myCluster of the Cluster to which
+    // each point belongs, so that points[pi] belongs to myCluster[pi],
+    // for each Point index pi.  A Cluster holds a mutable mean field
+    // and has methods for aggregation of its value.
+    private final Point[] points;
+    private final int k;
+    private Cluster[] clusters;
+    private int iterations;
+
+    public KMeans2Q(Point[] points, int k) {
+        this.points = points;
+        this.k = k;
+    }
+
+    public void findClusters(int[] initialPoints) {
+        ExecutorService executor = Executors.newWorkStealingPool();
+        final int threadCount = 8;
+        final int step = points.length/threadCount;
+
+        final Cluster[] clusters = GenerateData.initialClusters(points, initialPoints, Cluster::new, Cluster[]::new);
+        boolean converged = false;
+        while (!converged) {
+            iterations++;
+
+            for (Cluster c : clusters)
+                c.resetMean();
+
+            ArrayList<Callable<Void>> assignments = new ArrayList<>();
+
+            for (int i = 0; i < threadCount; i++) { 
+                final int from = i * step;
+                assignments.add(() -> {
+                    for (int j = from; j < from + step; j++) {
+                        Point p = points[j];
+                        Cluster best = null;
+                        for (Cluster c : clusters) 
+                            if (best == null || p.sqrDist(c.mean) < p.sqrDist(best.mean))
+                                best = c;
+                        best.addToMean(p);
+                    }
+                    return null;
+                });
+            }
+            try {
+                executor.invokeAll(assignments);
+            } catch (Exception e){
+                System.err.printf("Failed adding points to clusters.");
+            }
+
+            converged = true;
+            for (Cluster c : clusters)
+                converged &= c.computeNewMean();
+            System.err.println("Iterations: " + iterations);
+        }
+        this.clusters = clusters;
+    }
+
+    public void print() {
+        for (Cluster c : clusters)
+            System.out.println(c);
+        System.out.printf("Used %d iterations%n", iterations);      
+    }
+
+    static class Cluster extends ClusterBase {
+        private Point mean;
+        private double sumx, sumy;
+        private int count;
+        private final Object lock = new Object();
+
+        public Cluster(Point mean) {
+            this.mean = mean;
+        }
+
+        public void addToMean(Point p) {
+            synchronized(lock){
+                sumx += p.x;
+                sumy += p.y;
+                count++;
+            }
+        }
+
+        // Recompute mean, return true if it stays almost the same, else false
+        public boolean computeNewMean() {
+            Point oldMean = this.mean;
+            this.mean = new Point(sumx/count, sumy/count);
+            return oldMean.almostEquals(this.mean);
+        }
+
+        public void resetMean() {
+            sumx = sumy = 0.0;
+            count = 0;
+        }
+
+        @Override
+        public Point getMean() {
+            return mean;
+        }
+    }
+}
+
+class KMeans2Stm implements KMeans {
+    // Sequential version 2.  Data represention: An array points of
+    // Points and a same-index array myCluster of the Cluster to which
+    // each point belongs, so that points[pi] belongs to myCluster[pi],
+    // for each Point index pi.  A Cluster holds a mutable mean field
+    // and has methods for aggregation of its value.
+    private final Point[] points;
+    private final int k;
+    private Cluster[] clusters;
+    private int iterations;
+
+    public KMeans2Stm(Point[] points, int k) {
+        this.points = points;
+        this.k = k;
+    }
+
+    public void findClusters(int[] initialPoints) {
+        ExecutorService executor = Executors.newWorkStealingPool();
+        final int threadCount = 8;
+        final int step = points.length/threadCount;
+
+        final Cluster[] clusters = GenerateData.initialClusters(points, initialPoints, Cluster::new, Cluster[]::new);
+        final Cluster[] myCluster = new Cluster[points.length];
+
+        boolean converged = false;
+        while (!converged) {
+            iterations++;
+            ArrayList<Callable<Void>> assignments = new ArrayList<>();
+            for (int i = 0; i < threadCount; i++) { 
+                final int from = i * step;
+                assignments.add(() -> {
+                    for (int j = from; j < from + step; j++) {
+                        Point p = points[j];
+                        Cluster best = null;
+                        for (Cluster c : clusters) 
+                            if (best == null || p.sqrDist(c.mean) < p.sqrDist(best.mean))
+                                best = c;
+                        myCluster[j] = best;
+                    }
+                    return null;
+                });
+            }
+            try {
+                executor.invokeAll(assignments);
+            } catch (Exception e){
+                System.err.printf("Failed adding points to clusters.");
+            }
+
+            for (Cluster c : clusters)
+                c.resetMean();
+
+            ArrayList<Callable<Void>> updates = new ArrayList<>();
+            for (int i = 0; i < threadCount; i++) { 
+                final int from = i * step;
+                updates.add(() ->
+                { // Assignment step: put each point in exactly one cluster
+                    for (int j = from; j < from + step; j++) {
+                        // Update step: recompute mean of each cluster
+                            myCluster[j].addToMean(points[j]);
+                    }
+                    return null;
+                });
+            }
+            try {
+                executor.invokeAll(updates);
+            } catch (Exception e){
+                System.err.printf("Failed adding points to clusters.");
+            }
+
+            converged = true;
+            for (Cluster c : clusters)
+                converged &= c.computeNewMean();
+            System.err.println("Iterations: " + iterations);
+        }
+        this.clusters = clusters;
+    }
+
+    public void print() {
+        for (Cluster c : clusters)
+            System.out.println(c);
+        System.out.printf("Used %d iterations%n", iterations);      
+    }
+
+    static class Cluster extends ClusterBase {
+        private Point mean;
+        private final TxnDouble sumx, sumy;
+        private final TxnInteger count;
+
+        public Cluster(Point mean) {
+            this.mean = mean;
+            sumx = StmUtils.newTxnDouble(0.0);
+            sumy = StmUtils.newTxnDouble(0.0);
+            count = StmUtils.newTxnInteger(0);
+        }
+
+        public void addToMean(Point p) {
+            atomic(() -> {
+                sumx.set(sumx.get()+p.x);
+                sumy.set(sumy.get()+p.y);
+                count.set(count.get()+1);
+            });
+        }
+
+        // Recompute mean, return true if it stays almost the same, else false
+        public boolean computeNewMean() {
+            Point oldMean = this.mean;
+            atomic(() -> {
+                this.mean = new Point(sumx.get()/count.get(), sumy.get()/count.get());
+            });
+            return oldMean.almostEquals(this.mean);
+        }
+
+        public void resetMean() {
+            atomic(() -> {
+                sumx.set(0.0); 
+                sumy.set(0.0);
+                count.set(0);
+            });
+        }
+
+        @Override
+        public Point getMean() {
+            return mean;
+        }
+    }
+}
