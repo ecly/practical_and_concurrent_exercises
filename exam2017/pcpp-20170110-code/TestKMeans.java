@@ -550,10 +550,10 @@ class KMeans2P implements KMeans {
         final Cluster[] clusters = GenerateData.initialClusters(points, initialPoints, Cluster::new, Cluster[]::new);
         final Cluster[] myCluster = new Cluster[points.length];
 
-        ArrayList<Callable<Void>> assignments = new ArrayList<>();
         boolean converged = false;
         while (!converged) {
             iterations++;
+            ArrayList<Callable<Void>> assignments = new ArrayList<>();
             for (int i = 0; i < threadCount; i++) { 
                 final int from = i * step;
                 assignments.add(() -> {
@@ -580,7 +580,7 @@ class KMeans2P implements KMeans {
             ArrayList<Callable<Void>> updates = new ArrayList<>();
             for (int i = 0; i < threadCount; i++) { 
                 final int from = i * step;
-                assignments.add(() ->
+                updates.add(() ->
                 { // Assignment step: put each point in exactly one cluster
                     for (int j = from; j < from + step; j++) {
                         // Update step: recompute mean of each cluster
