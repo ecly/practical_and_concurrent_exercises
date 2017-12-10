@@ -21,19 +21,39 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.function.IntToDoubleFunction;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.Executors;
+import org.multiverse.api.references.*;
+import static org.multiverse.api.StmUtils.*;
+import org.multiverse.api.StmUtils;
 import java.util.ArrayList;
+import java.util.stream.Collectors;
+import java.util.stream.Collectors.*;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
+import java.util.function.DoubleFunction;
+import java.util.function.Function;
+import java.util.
+import java.util.Arrays;
 
 public class SortingPipeline {
 	public static void main(String[] args) {
 		SystemInfo();
-		final int count = 100_000, P = 4;
+		final int count = 60, P = 4;
 		final double[] arr = DoubleArray.randomPermutation(count);
-
+        /*
 		final BlockingDoubleQueue[] queues = new BlockingDoubleQueue[P+1];
 		for(int i = 0; i <= P; i++) {
-			queues[i] = new NolockNDoubleQueue();
+			queues[i] = new StmBlockingNDoubleQueue();
 		}	
-		SortingPipeline.sortPipeline(arr, P, queues);
+		SortingPipeline.sortPipeline(arr, P, queues);*/
+		StreamSortingStage stage0 = new StreamSortingStage(DoubleStream.of(arr), 20);
+		DoubleStream output0 = stage0.getInput().flatmap(x -> stage0.stage.apply(x));
+		StreamSortingStage stage1 = new StreamSortingStage(output0, 20);
+		DoubleStream output1 = stage1.getInput.flatmap(x -> stage1.stage.apply(x));
+	    StreamSortingStage stage2 = new StreamSortingStage(output1, 20);
+		DoubleStream output2 = stage2.getInput.flatmap(x -> stage2.stage.apply(x));
+		for(double d : output2.toArray()) {
+			System.out.println(d);
+		}
 	}
 
 	private static void sortPipeline(double[] arr, int P, BlockingDoubleQueue[] queues) {
@@ -56,6 +76,37 @@ public class SortingPipeline {
 				System.out.println(e);
 			}
 		}
+	}
+
+	static class StreamSortingStage {
+		private final DoubleStream input;
+		private final double[] heap;
+		private int heapSize;
+
+		public StreamSortingStage(DoubleStream input, int S) {
+			this.input = input;
+			heap = new double[S];
+		}
+
+		public DoubleStream getInput() {
+			return input;
+		}
+
+		public DoubleStream stage(double item) {
+			if(heapSize < heap.length) {
+				heap[heapSize++] = item;
+				DoubleArray.minheapSiftup(heap, heapSize-1, heapSize-1);
+				return DoubleStream.empty();
+			} else if (item <= heap[0]) {
+				return DoubleStream.of(item);
+			} else {
+				double least = heap[0];
+				heap[0] = item;
+				DoubleArray.minheapSiftdown(heap, 0, heapSize-1);
+				return DoubleStream.of(item);
+			}
+		}
+
 	}
 
 	static class SortingStage implements Runnable {
@@ -383,7 +434,7 @@ class UnboundedDoubleQueue implements BlockingDoubleQueue {
 
 class NolockNDoubleQueue implements BlockingDoubleQueue {
 	double[] items = new double[50];
-    int head, tail; 
+	int head, tail; 
 
 	public NolockNDoubleQueue() {
 	}
@@ -401,3 +452,93 @@ class NolockNDoubleQueue implements BlockingDoubleQueue {
 		return item;
 	}
 }
+
+class MSUnboundedDoubleQueue implements BlockingDoubleQueue {
+	private final AtomicReference<Node> head, tail;
+
+	public MSUnboundedDoubleQueue() {
+		Node dummy = new Node(-1.0, null);
+		head = new AtomicReference<Node>(dummy);
+		tail = new AtomicReference<Node>(dummy);
+	}
+
+	private class Node { 
+		final double item;
+		final AtomicReference<Node> next;
+
+		public Node(double item, Node next) {
+			this.item = item;
+			this.next = new AtomicReference<Node>(next);
+		}
+	}
+
+	public void put(double item) {
+		Node node = new Node(item, null);
+		while (true) {
+			Node last = tail.get(),
+				 next = last.next.get();
+			if (last == tail.get()) {
+				if (next == null) {
+					if (last.next.compareAndSet(next, node)) {
+						tail.compareAndSet(last, node);
+						return;
+					}
+				} else
+					tail.compareAndSet(last, next);
+			}
+		}
+	}
+
+	public double take() {
+		while (true) {
+			Node first = head.get(),
+				 last = tail.get(),
+				 next = first.next.get();
+			if (first == head.get()) {
+				while (first == last) {
+					last = tail.get();
+					next = first.next.get();
+					if (next != null) {
+						tail.compareAndSet(last, next);
+					}	
+				}
+				double result = next.item;
+				if (head.compareAndSet(first, next))
+					return result;
+			}
+		}
+	}
+}
+
+class StmBlockingNDoubleQueue implements BlockingDoubleQueue {
+	private final double[] items = new double[50];
+	private final TxnInteger head = StmUtils.newTxnInteger(0);
+	private final TxnInteger tail = StmUtils.newTxnInteger(0);
+	private int size; 
+	private double item;
+
+	public StmBlockingNDoubleQueue() {
+	}
+
+	public void put(double putItem) {
+	    while (size == items.length) {}
+
+		atomic(() -> {
+			items[tail.get()] = putItem;
+			tail.set((tail.get() + 1) % items.length);
+			size++;
+		});
+	}
+
+	public double take() {
+		while (size == 0) {}
+
+		atomic(() -> {
+			item = items[head.get()];
+			head.set((head.get() + 1) % items.length);
+			size--;
+		});
+		return item;
+	}
+}
+
